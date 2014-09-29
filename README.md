@@ -89,6 +89,24 @@ you are NOT allowed to use shared memory.
 * Plot a graph of the comparison and write a short explanation of the phenomenon you
   see here.
 
+### Answers
+* My gpu accelerated algorithm actually runs much slower than my sequential cpu algorithm.
+  I think this is due to a poor implementation of the naive algorithm on my part.  The 
+  way my naive algorithm works is to so a segmented scan and save the largest value in 
+  each segment to an auxiliary array.  I then call scan recursively on the auxiliary 
+  array.  My fatal mistake was that I allocated the memory for the auxiliary array within 
+  the naive_scan call.  The result of this is that for an array of length N i have log(n) 
+  calls to malloc which is pretty slow.  The sequential version already has everything in 
+  memory so it runs much more quickly.  I'm pretty ceratin if I were to initialize all 
+  the memory outside the call I would see significant performance improvement and I plan 
+  to do this before using the algorithm in the next assignment.
+
+* There are also some other places I could get some speedup, for example in my kernel 
+  call I actually move data between my two temporary arrays inside the loop when I could 
+  just swap their pointers.
+  
+* My graph is in string compaction graph.pdf
+
 # PART 3 : OPTIMIZING PREFIX SUM
 In the previous section we did not take into account shared memory.  In the
 previous section, we kept everything in global memory, which is much slower than
@@ -107,6 +125,15 @@ to arbitrary length arrays, this includes arrays that will not fit on one block.
 * Plot a graph of the comparison and write a short explanation of the phenomenon
   you see here.
 
+### Answers
+* I do see some speedup, however my implementation is still far worse than CPU.  This is 
+  again due to having allocation inside my recursive call (which was a stupid idea).  I 
+  plan to fix this before using this algorithm.
+* I did see performance improvement in this version over the last one.  This is because 
+  the loop within my kernel calls now only has to go to shared memory instead of out to 
+  global memory.  
+* My graph is in string compaction graph.pdf
+
 # PART 4 : ADDING SCATTER
 First create a serial version of scatter by expanding the serial version of
 prefix sum.  Then create a GPU version of scatter.  Combine the function call
@@ -117,6 +144,13 @@ array for you.  Finally, write a version using thrust.
 * Compare your version of stream compact to your version using thrust.  How do
   they compare?  How might you optimize yours more, or how might thrust's stream
   compact be optimized.
+
+### Answers
+* Unfortunately I spent many hours debugging and was not able to implement a version in 
+  thrust, however I'm quite certain their implementation is superior to mine in every way.
+  They probably have done all sorts of tricks to squeeze out extra performance such as 
+  doing a work-efficient algorithm without bank conflicts.  They also probably packed 
+  more data into registers to do more work per thread.
 
 # EXTRA CREDIT (+10)
 For extra credit, please optimize your prefix sum for work parallelism and to
